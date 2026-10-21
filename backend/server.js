@@ -1,31 +1,54 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 const cors = require("cors");
-require("dotenv").config();
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
-const productRoutes = require("./routes/productRoutes");
+dotenv.config();
+
+const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const productRoutes = require("./routes/productRoutes");
+const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
 
+// Security Middlewares
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+// Rate Limiter: max 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: {
+    message: "Too many requests from this IP, please try again after 15 minutes"
+  }
+});
+app.use(limiter);
+
+// MongoDB Database Connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB Connected");
-  })
-  .catch((error) => {
-    console.log("MongoDB Connection Error:", error);
-  });
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("MongoDB Connection Error:", err));
 
+// Root Health Check Route
 app.get("/", (req, res) => {
-  res.send("Full Stack API is Running");
+  res.json({
+    message: "Secure REST API is running"
+  });
 });
 
-app.use("/api/products", productRoutes);
+// Mounted Routes
+app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/products", productRoutes);
+
+// Centralized Error Handling Middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
