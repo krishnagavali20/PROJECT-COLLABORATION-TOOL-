@@ -1,15 +1,14 @@
 import { useContext, useState } from 'react';
 import { TaskContext } from '../context/TaskContext';
-import { UserContext } from '../context/UserContext'; // Import UserContext
+import { UserContext } from '../context/UserContext';
 
 export default function Dashboard() {
-  const { tasks, addTask, removeTask, searchQuery } = useContext(TaskContext);
-  const user = useContext(UserContext); // Grab the user's data
+  const { tasks, addTask, removeTask, completeTask, searchQuery } = useContext(TaskContext);
+  const user = useContext(UserContext); 
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const handleAdd = () => {
     if (newTaskTitle.trim() !== "") {
-      // Pass the user's name when adding the task
       addTask(newTaskTitle, user.name);
       setNewTaskTitle(""); 
     }
@@ -27,17 +26,18 @@ export default function Dashboard() {
           value={newTaskTitle}
           onChange={(e) => setNewTaskTitle(e.target.value)}
           placeholder="New task description..."
-          className="px-3 py-2 border border-slate-300 rounded text-sm w-64 focus:outline-none focus:border-blue-500"
+          className="px-3 py-2 border border-slate-300 rounded text-sm w-64 focus:outline-none focus:border-indigo-500"
         />
-        <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition">
+        <button onClick={handleAdd} className="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-indigo-700 transition">
           Add Task
         </button>
       </div>
 
-     <div className="bg-slate-100/50 p-4 rounded-xl border border-slate-200/60 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] min-h-[300px]">
+     {/* FINAL FIX: Updated column background and border to match the cool gray theme */}
+     <div className="bg-slate-200/50 p-4 rounded-xl border border-slate-300/60 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] min-h-[300px]">
         <h2 className="text-sm font-bold text-slate-700 mb-4 flex items-center justify-between">
           <span>TASKS</span>
-          <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs">{filteredTasks.length}</span>
+          <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs">{filteredTasks.length}</span>
         </h2>
         
         <div className="space-y-3">
@@ -45,15 +45,31 @@ export default function Dashboard() {
             <p className="text-xs text-slate-500 italic">No tasks found matching "{searchQuery}"</p>
           ) : (
             filteredTasks.map((task) => (
-              <div key={task.id} className="bg-white p-3 rounded border border-slate-200 shadow-sm transition hover:shadow-md">
+              <div 
+                key={task.id} 
+                className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 group"
+              >
                 <div className="flex justify-between items-start mb-2">
-                  <p className="text-sm font-medium text-slate-800 leading-snug">{task.title}</p>
-                  <button onClick={() => removeTask(task.id)} className="text-slate-400 hover:text-red-500 transition text-xs font-bold p-1">
-                    ✕
-                  </button>
+                  <p className="text-sm font-medium text-slate-800 leading-snug w-3/4">{task.title}</p>
+                  
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => completeTask(task.id, user.name)} 
+                      className="text-emerald-600 hover:text-emerald-700 transition text-xs font-bold px-2 py-1 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200"
+                      title="Mark as Complete"
+                    >
+                      ✓
+                    </button>
+                    <button 
+                      onClick={() => removeTask(task.id)} 
+                      className="text-red-500 hover:text-red-600 transition text-xs font-bold px-2 py-1 bg-red-50 hover:bg-red-100 rounded border border-red-200"
+                      title="Delete Task"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
                 
-                {/* NEW: Audit Trail Footer on the card */}
                 <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                   <div className="flex items-center gap-1.5">
                     <div className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[8px]">
