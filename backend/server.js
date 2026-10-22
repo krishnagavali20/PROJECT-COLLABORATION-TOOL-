@@ -1,12 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+require("dotenv").config();
 
-dotenv.config();
-
+const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -19,35 +18,36 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Rate Limiter: max 100 requests per 15 minutes
+// Rate Limiting (100 reqs per 15 mins)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: {
-    message: "Too many requests from this IP, please try again after 15 minutes"
-  }
+  message: { message: "Too many requests, please try again later." }
 });
 app.use(limiter);
 
-// MongoDB Database Connection
+// Database Connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("MongoDB Connection Error:", err));
+  .then(() => console.log("MongoDB connected"))
+  .catch((error) => console.log("MongoDB connection error:", error));
 
 // Root Health Check Route
 app.get("/", (req, res) => {
-  res.json({
-    message: "Secure REST API is running"
-  });
+  res.send("JWT Authentication API is running");
 });
 
-// Mounted Routes
+// Mounted Routes for Experiment 6
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+
+// Compatibility aliases for Experiment 4 & 5
+app.use("/api/users", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/products", productRoutes);
 
-// Centralized Error Handling Middleware
+// Error Handling Middleware
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

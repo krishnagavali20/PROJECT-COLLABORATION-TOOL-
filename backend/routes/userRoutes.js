@@ -1,34 +1,30 @@
 const express = require("express");
-const router = express.Router();
-const { body } = require("express-validator");
-const {
-  registerUser,
-  loginUser,
-  getProfile
-} = require("../controllers/userController");
-const protect = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
+const { getProfile } = require("../controllers/userController");
 
-// POST /api/users/register (with input validation)
-router.post(
-  "/register",
-  [
-    body("name")
-      .notEmpty()
-      .withMessage("Name is required"),
-    body("email")
-      .isEmail()
-      .withMessage("Enter valid email"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must contain at least 6 characters")
-  ],
-  registerUser
+const router = express.Router();
+
+// 1. USER + ADMIN PROTECTED DASHBOARD
+router.get("/dashboard", protect, (req, res) => {
+  res.json({
+    message: "Welcome to the protected dashboard",
+    user: req.user
+  });
+});
+
+// 2. ADMIN ONLY ROUTE
+router.get(
+  "/admin",
+  protect,
+  authorize("admin"),
+  (req, res) => {
+    res.json({
+      message: "Welcome Admin! You can access this page."
+    });
+  }
 );
 
-// POST /api/users/login
-router.post("/login", loginUser);
-
-// GET /api/users/profile (Protected)
+// 3. USER PROFILE (Exp 5 compatibility)
 router.get("/profile", protect, getProfile);
 
 module.exports = router;
