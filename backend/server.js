@@ -1,8 +1,10 @@
 const express = require("express");
+const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const { Server } = require("socket.io");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -12,6 +14,27 @@ const productRoutes = require("./routes/productRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
 
 const app = express();
+const server = http.createServer(app);
+
+// WebSocket Setup with Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173", "http://localhost:3000", "*"],
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("chatMessage", (message) => {
+    io.emit("chatMessage", message);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+  });
+});
 
 // Security Middlewares
 app.use(helmet());
@@ -34,19 +57,17 @@ mongoose
 
 // Root Health Check Route
 app.get("/", (req, res) => {
-  res.send("JWT Authentication API is running");
+  res.send("WebSocket and REST API is running");
 });
 
-// Experiment 7 Docker API Health Endpoint
+// Docker Verification Endpoint (Exp 7)
 app.get("/api", (req, res) => {
   res.json({ message: "Backend is running inside Docker!" });
 });
 
-// Mounted Routes for Experiment 6
+// Mounted Routes (Exp 4, 5, 6)
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-
-// Compatibility aliases for Experiment 4 & 5
 app.use("/api/users", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
@@ -57,7 +78,6 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Backend running on port ${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`WebSocket server running on port ${PORT}`);
 });
-
