@@ -37,6 +37,11 @@ app.get("/", (req, res) => {
   res.send("JWT Authentication API is running");
 });
 
+// Experiment 7 Docker API Health Endpoint
+app.get("/api", (req, res) => {
+  res.json({ message: "Backend is running inside Docker!" });
+});
+
 // Mounted Routes for Experiment 6
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -52,6 +57,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend running on port ${PORT}`);
 });
+
