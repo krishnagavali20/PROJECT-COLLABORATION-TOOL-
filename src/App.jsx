@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import Analytics from './components/Analytics';
-import Navbar from './components/Navbar';
+import Navbar from './components/navbar';
 import { UserContext } from './context/UserContext';
 import { TaskProvider } from './context/TaskContext';
 
