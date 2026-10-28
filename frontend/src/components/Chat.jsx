@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { io } from "socket.io-client";
 import { UserContext } from "../context/UserContext";
+import { getApiBaseUrl } from "../utils/api";
 
 export default function Chat() {
   const { user } = useContext(UserContext);
@@ -25,7 +26,7 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const backendUrl = getApiBaseUrl();
     const socket = io(backendUrl, {
       reconnectionAttempts: 5,
       timeout: 10000,

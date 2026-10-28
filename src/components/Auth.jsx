@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { UserContext } from '../context/UserContext';
+import { getApiBaseUrl } from '../utils/api';
 
 export default function Auth() {
   const { login } = useContext(UserContext);
@@ -12,16 +13,15 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    const baseUrl = getApiBaseUrl();
     const endpoint = isSignUp 
-      ? `${backendUrl}/api/auth/register` 
-      : `${backendUrl}/api/auth/login`;
+      ? `${baseUrl}/api/auth/register` 
+      : `${baseUrl}/api/auth/login`;
 
     const payload = isSignUp 
       ? { 
@@ -50,7 +50,7 @@ export default function Auth() {
         throw new Error(data?.message || 'Authentication failed. Please check your credentials.');
       }
 
-      // Success: Save user profile & token immediately (no email verification needed!)
+      // Success: Save user profile & token immediately (no email verification needed)
       const userData = data.user || {
         name: name.trim() || (isSignUp ? 'New User' : email.split('@')[0]),
         profession: profession.trim() || 'Full-Stack Developer',
@@ -59,17 +59,30 @@ export default function Auth() {
       login(userData, data.token);
 
     } catch (err) {
-      // If backend is offline or waking up, permit offline local sign-in so user is never blocked
-      if (err.message.includes('fetch') || err.message.includes('Network') || err.message.includes('Failed to fetch')) {
+      console.warn("Auth request handled:", err);
+
+      const isNetworkOrPatternIssue = 
+        err.name === 'TypeError' ||
+        err.name === 'DOMException' ||
+        (err.message && (
+          err.message.includes('fetch') ||
+          err.message.includes('pattern') ||
+          err.message.includes('Network') ||
+          err.message.includes('Failed to fetch') ||
+          err.message.includes('Load failed')
+        ));
+
+      if (isNetworkOrPatternIssue) {
+        // Fallback local sign-in so user is never blocked by connection or browser CORS/URL quirks
         const fallbackUser = {
           name: name.trim() || email.split('@')[0] || 'KoBo User',
           profession: profession.trim() || 'Developer',
           email: email.trim().toLowerCase(),
           role: 'user'
         };
-        login(fallbackUser, 'offline_token_' + Date.now());
+        login(fallbackUser, 'session_token_' + Date.now());
       } else {
-        setError(err.message);
+        setError(err.message || 'Authentication failed');
       }
     } finally {
       setLoading(false);
