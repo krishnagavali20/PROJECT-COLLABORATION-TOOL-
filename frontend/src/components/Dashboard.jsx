@@ -4,7 +4,7 @@ import { TaskContext } from '../context/TaskContext';
 import { UserContext } from '../context/UserContext';
 
 export default function Dashboard() {
-  const { tasks, addTask, updateTaskStatus, removeTask, projects, setIsTaskModalOpen } = useContext(TaskContext);
+  const { tasks, addTask, updateTaskStatus, removeTask, projects, setIsTaskModalOpen, loadSampleData } = useContext(TaskContext);
   const { user } = useContext(UserContext);
 
   const [quickTitle, setQuickTitle] = useState('');
@@ -16,8 +16,8 @@ export default function Dashboard() {
   const completedCount = safeTasks.filter(t => t.status === 'COMPLETED').length;
   const inProgressCount = safeTasks.filter(t => t.status === 'IN PROGRESS').length;
   const todoCount = safeTasks.filter(t => t.status === 'TO DO').length;
-  const totalCount = safeTasks.length || 1;
-  const completionPercentage = Math.round((completedCount / totalCount) * 100);
+  const totalCount = safeTasks.length || 0;
+  const completionPercentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
   const handleQuickAdd = (e) => {
     e.preventDefault();
@@ -62,7 +62,11 @@ export default function Dashboard() {
               )}
             </h1>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-              Sprint 24 velocity is at <strong className="text-slate-800 font-semibold">{completionPercentage}% completion</strong>. You have {inProgressCount} active tasks currently in development.
+              {safeTasks.length === 0 ? (
+                <span>You currently have <strong className="text-slate-800 font-semibold">0 tasks</strong> in your sprint. Create your first task below to get started.</span>
+              ) : (
+                <span>Sprint velocity is at <strong className="text-slate-800 font-semibold">{completionPercentage}% completion</strong>. You have {inProgressCount} active tasks currently in development.</span>
+              )}
             </p>
           </div>
 
@@ -157,7 +161,31 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-2">
-            {highPriorityTasks.length === 0 ? (
+            {safeTasks.length === 0 ? (
+              <div className="p-8 bg-white rounded-xl border border-slate-200 text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-sm font-semibold">
+                  📋
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-slate-800">Your task backlog is empty</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Start by adding your first task or load sample sprint data to explore.</p>
+                </div>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <button
+                    onClick={() => setIsTaskModalOpen(true)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition cursor-pointer"
+                  >
+                    + Create Task
+                  </button>
+                  <button
+                    onClick={loadSampleData}
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium border border-slate-200 transition cursor-pointer"
+                  >
+                    ⚡ Load Sample Sprint Data
+                  </button>
+                </div>
+              </div>
+            ) : highPriorityTasks.length === 0 ? (
               <div className="p-6 bg-white rounded-xl border border-slate-200 text-center">
                 <p className="text-xs text-slate-500 font-medium">All high priority tasks are completed.</p>
               </div>
@@ -181,7 +209,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {task.status === 'TO DO' && (
                       <button
-                        onClick={() => updateTaskStatus(task.id, 'IN PROGRESS', user?.name || 'Krishna')}
+                        onClick={() => updateTaskStatus(task.id, 'IN PROGRESS', user?.name || 'Member')}
                         className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium transition"
                       >
                         Start →
@@ -189,7 +217,7 @@ export default function Dashboard() {
                     )}
                     {task.status === 'IN PROGRESS' && (
                       <button
-                        onClick={() => updateTaskStatus(task.id, 'COMPLETED', user?.name || 'Krishna')}
+                        onClick={() => updateTaskStatus(task.id, 'COMPLETED', user?.name || 'Member')}
                         className="px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-medium transition"
                       >
                         ✓ Done
@@ -213,22 +241,31 @@ export default function Dashboard() {
         <div className="space-y-4">
           <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Workspaces</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Workspaces ({safeProjects.length})</h2>
               <Link to="/projects" className="text-[11px] text-blue-600 hover:text-blue-700 font-medium">Details →</Link>
             </div>
 
             <div className="space-y-2.5">
-              {safeProjects.map(proj => (
-                <div key={proj.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-slate-800 truncate">{proj.title}</span>
-                    <span className="text-slate-500 font-mono font-semibold">{proj.progress}%</span>
+              {safeProjects.length > 0 ? (
+                safeProjects.map(proj => (
+                  <div key={proj.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-medium">
+                      <span className="text-slate-800 truncate">{proj.title}</span>
+                      <span className="text-slate-500 font-mono font-semibold">{proj.progress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${proj.progress}%` }}></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${proj.progress}%` }}></div>
-                  </div>
+                ))
+              ) : (
+                <div className="p-4 rounded-lg bg-slate-50 border border-dashed border-slate-200 text-center">
+                  <p className="text-xs text-slate-500">No active projects</p>
+                  <Link to="/projects" className="text-[11px] text-blue-600 hover:underline font-medium mt-1 inline-block">
+                    + Create a project
+                  </Link>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

@@ -3,7 +3,7 @@ import { TaskContext } from '../context/TaskContext';
 import { UserContext } from '../context/UserContext';
 
 export default function KanbanBoard() {
-  const { tasks, removeTask, updateTaskStatus, searchQuery, activeFilter, setIsTaskModalOpen } = useContext(TaskContext);
+  const { tasks, removeTask, updateTaskStatus, searchQuery, activeFilter, setIsTaskModalOpen, loadSampleData } = useContext(TaskContext);
   const { user } = useContext(UserContext);
 
   const [filterPriority, setFilterPriority] = useState('ALL');
@@ -109,7 +109,7 @@ export default function KanbanBoard() {
 
           <button
             onClick={() => setIsTaskModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition active:scale-[0.99]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition active:scale-[0.99] cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -118,6 +118,35 @@ export default function KanbanBoard() {
           </button>
         </div>
       </div>
+
+      {/* Zero State Alert Banner */}
+      {safeTasks.length === 0 && (
+        <div className="mb-6 p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">
+              0
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-slate-800">Your Kanban sprint board has 0 tasks</h4>
+              <p className="text-[11px] text-slate-500">Create your first task or click below to load sample sprint data.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={loadSampleData}
+              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium border border-slate-200 transition cursor-pointer"
+            >
+              ⚡ Load Sample Tasks
+            </button>
+            <button
+              onClick={() => setIsTaskModalOpen(true)}
+              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition cursor-pointer"
+            >
+              + Create Task
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 4-Column Responsive Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
