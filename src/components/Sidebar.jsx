@@ -88,14 +88,15 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Workspace Brand Header */}
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs tracking-wider shadow-sm">
+              KB
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-semibold text-slate-900 tracking-tight">CollabWorkspace</h1>
+                <h1 className="text-base font-bold text-slate-900 tracking-tight">KoBo</h1>
+                <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                  Workspace
+                </span>
               </div>
               <p className="text-[11px] text-slate-500 font-medium">Sprint 24 · Active</p>
             </div>

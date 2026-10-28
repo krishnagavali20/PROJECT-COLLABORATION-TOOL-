@@ -104,7 +104,7 @@ export default function Chat() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-semibold text-slate-900">
-                  Team Collaboration Chat
+                  KoBo Team Chat
                 </h1>
                 <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                   #general

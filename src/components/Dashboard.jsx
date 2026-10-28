@@ -51,7 +51,7 @@ export default function Dashboard() {
           <div>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium mb-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              Sprint 24 · Production Workspace
+              KoBo · Sprint 24 Workspace
             </div>
             <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
               Welcome back, {user?.name || "Krishna"}
