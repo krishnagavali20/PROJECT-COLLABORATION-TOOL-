@@ -13,8 +13,8 @@ export default function Chat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
-      username: "NexusBot",
-      message: "👋 Welcome to the real-time collaboration stream! Messages sync across all browser tabs via WebSockets.",
+      username: "System",
+      message: "Team chat connected via WebSockets. Messages synchronize across browser tabs in real-time.",
       timestamp: "System"
     }
   ]);
@@ -92,102 +92,80 @@ export default function Chat() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 animate-slide-up">
-      {/* Top Banner / Stream Info */}
-      <div className="nexus-glass rounded-2xl p-6 sm:p-8 mb-6 border border-slate-800/80 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-10"></div>
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6 mb-6">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-[1.5px] shadow-lg shadow-indigo-500/25">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <svg className="w-6 h-6 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-              </div>
+    <div className="max-w-4xl mx-auto px-4 py-6 animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+        {/* Header */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+              💬
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                  Real-Time Collaboration Hub
+                <h1 className="text-base font-semibold text-slate-900">
+                  Team Collaboration Chat
                 </h1>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                   #general
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Bi-directional, low-latency messaging powered by WebSockets (Socket.IO)
+              <p className="text-xs text-slate-500">
+                Real-time WebSocket communication on port 5000
               </p>
             </div>
           </div>
 
-          {/* Connection Status Badge */}
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+          {/* Connection Status */}
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
               connected 
-                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]' 
-                : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                : 'bg-amber-50 text-amber-800 border-amber-200'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-              <span>{connected ? "WebSocket Connected" : "Connecting..."}</span>
+              <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+              <span>{connected ? "Connected" : "Connecting..."}</span>
               {socketId && (
                 <span className="text-[10px] text-slate-400 font-mono hidden md:inline">
-                  [{socketId.slice(0, 5)}]
+                  ({socketId.slice(0, 4)})
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Identity & Display Name Strip */}
-        <div className="bg-slate-900/60 rounded-xl p-3.5 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-md">
-              {username.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
-                Your Display Name
-              </span>
-              <input
-                type="text"
-                placeholder="Enter your name..."
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="bg-transparent text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:text-indigo-400 transition"
-              />
-            </div>
+        {/* Display Name Setting Bar */}
+        <div className="bg-slate-50/70 px-4 sm:px-5 py-2.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-500 font-medium">Your Name:</span>
+            <input
+              type="text"
+              placeholder="Your name..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:border-slate-400"
+            />
           </div>
-          
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-            <span>Broadcasts live to all connected browser windows</span>
-          </div>
+          <span className="text-[11px] text-slate-400">
+            Messages sync instantly across all browser windows
+          </span>
         </div>
 
-        {/* Chat Messages Stream Window */}
-        <div className="mt-6 bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 sm:p-6 min-h-[360px] max-h-[460px] overflow-y-auto flex flex-col gap-3 shadow-inner">
+        {/* Message Stream */}
+        <div className="p-4 sm:p-6 min-h-[380px] max-h-[460px] overflow-y-auto flex flex-col gap-3 bg-slate-50/30">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center m-auto text-center py-12">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-3">
-                💬
-              </div>
-              <h2 className="text-sm font-bold text-slate-200">No messages in channel yet</h2>
-              <p className="text-xs text-slate-400 max-w-xs mt-1">
-                Be the first to post! Open another tab to test instant bi-directional synchronization.
-              </p>
+            <div className="flex flex-col items-center justify-center m-auto text-center py-12 text-slate-400">
+              <p className="text-xs font-medium">No messages yet. Send the first message!</p>
             </div>
           ) : (
             messages.map((item, index) => {
               const isSelf = item.username === username.trim();
-              const isBot = item.username === "NexusBot";
+              const isSystem = item.username === "System";
 
-              if (isBot) {
+              if (isSystem) {
                 return (
-                  <div key={index} className="flex justify-center my-1 animate-slide-up">
-                    <div className="px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-[11px] text-indigo-300 flex items-center gap-2">
-                      <span className="text-xs">🤖</span>
-                      <span>{item.message}</span>
+                  <div key={index} className="flex justify-center my-1">
+                    <div className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] text-slate-600">
+                      {item.message}
                     </div>
                   </div>
                 );
@@ -196,10 +174,10 @@ export default function Chat() {
               return (
                 <div 
                   key={index} 
-                  className={`flex flex-col ${isSelf ? 'items-end' : 'items-start'} animate-slide-up`}
+                  className={`flex flex-col ${isSelf ? 'items-end' : 'items-start'}`}
                 >
-                  <div className="flex items-center gap-2 mb-1 px-1">
-                    <span className={`text-[11px] font-bold ${isSelf ? 'text-indigo-400' : 'text-slate-300'}`}>
+                  <div className="flex items-center gap-1.5 mb-1 px-1 text-[11px]">
+                    <span className="font-semibold text-slate-700">
                       {isSelf ? "You" : item.username}
                     </span>
                     <span className="text-[10px] text-slate-400">
@@ -207,10 +185,10 @@ export default function Chat() {
                     </span>
                   </div>
 
-                  <div className={`max-w-[85%] sm:max-w-md px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-md ${
+                  <div className={`max-w-[85%] sm:max-w-md px-3.5 py-2 rounded-lg text-xs leading-relaxed ${
                     isSelf 
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-tr-none shadow-indigo-500/15' 
-                      : 'bg-slate-900 border border-slate-800 text-slate-100 rounded-tl-none'
+                      ? 'bg-slate-900 text-white rounded-tr-none shadow-2xs' 
+                      : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-2xs'
                   }`}>
                     {item.message}
                   </div>
@@ -221,20 +199,20 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Response Chips */}
-        <div className="mt-3.5 flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">Quick Actions:</span>
+        {/* Quick Action Chips */}
+        <div className="px-4 sm:px-5 py-2.5 bg-white border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-[11px] text-slate-400 mr-1">Quick text:</span>
           {[
-            "🚀 Ready to deploy!",
-            "✅ Task verified & complete",
-            "🔥 Found a bug in backend",
-            "👋 Hello from another tab!"
+            "Sprint review scheduled for 4 PM",
+            "Task verified & moved to completed",
+            "Bug identified on backend endpoint",
+            "All test suites passing"
           ].map((chip, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => sendQuickPrompt(chip)}
-              className="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-indigo-600/30 text-slate-300 hover:text-indigo-200 border border-slate-700/80 hover:border-indigo-500/40 text-[11px] font-medium transition duration-150"
+              className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition"
             >
               {chip}
             </button>
@@ -242,29 +220,22 @@ export default function Chat() {
         </div>
 
         {/* Message Input Dock */}
-        <form onSubmit={sendMessage} className="mt-4 flex gap-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder="Type your message... (Press Enter to send)"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40 transition shadow-inner"
-            />
-          </div>
+        <form onSubmit={sendMessage} className="p-4 bg-white border-t border-slate-200 flex gap-2">
+          <input
+            type="text"
+            placeholder="Type your message... (press Enter to send)"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="flex-1 px-3.5 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:border-slate-500 transition"
+          />
           <button
             type="submit"
             disabled={!message.trim()}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs transition active:scale-[0.99]"
           >
-            <span>Send</span>
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+            Send
           </button>
         </form>
-
       </div>
     </div>
   );

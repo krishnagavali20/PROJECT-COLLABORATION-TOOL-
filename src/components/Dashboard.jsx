@@ -33,194 +33,166 @@ export default function Dashboard() {
   const getPriorityBadge = (priority) => {
     switch ((priority || '').toUpperCase()) {
       case 'URGENT':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+        return 'bg-rose-50 text-rose-700 border-rose-200';
       case 'HIGH':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'MEDIUM':
-        return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
       default:
-        return 'bg-slate-800 text-slate-400 border-slate-700';
+        return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
 
   return (
-    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-slide-up space-y-8">
-      {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/60 via-slate-900/90 to-purple-950/40 border border-indigo-500/30 p-6 lg:p-8 shadow-2xl backdrop-blur-xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Sprint 24 · Production Phase
+    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-fade-in space-y-6">
+      {/* Human-Crafted Light Welcome Header (no purple gradients) */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium mb-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Sprint 24 · Production Workspace
             </div>
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-              Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300">{user?.name || "Krishna"}</span> 👋
+            <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
+              Welcome back, {user?.name || "Krishna"}
             </h1>
-            <p className="text-xs lg:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Workspace velocity is active at <strong className="text-indigo-300 font-semibold">{completionPercentage}% sprint completion</strong>. Multi-container microservices and WebSockets are live on Node.js port 5000.
+            <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+              Sprint 24 velocity is at <strong className="text-slate-800 font-semibold">{completionPercentage}% completion</strong>. You have {inProgressCount} active tasks currently in development.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setIsTaskModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all duration-200 hover:scale-[1.02]"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition active:scale-[0.99]"
             >
-              + Create Task
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Create Task</span>
             </button>
             <Link
               to="/kanban"
-              className="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 font-semibold text-xs border border-slate-700 transition"
+              className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs border border-slate-200 transition"
             >
               Open Kanban Board →
             </Link>
           </div>
         </div>
-
-        {/* Ambient decorative glow */}
-        <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* KPI Cards Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Tasks */}
-        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Backlog</span>
-            <span className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs">📋</span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-white">{safeTasks.length}</div>
-          <div className="text-[11px] text-slate-400 mt-1 font-mono">
-            {todoCount} pending · {inProgressCount} active
+      {/* KPI Cards Row (Clean, no Docker) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs">
+          <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1">Total Tasks</div>
+          <div className="text-2xl font-bold text-slate-900">{safeTasks.length}</div>
+          <div className="text-[11px] text-slate-500 mt-1">{todoCount} pending backlog</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs">
+          <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1">In Progress</div>
+          <div className="text-2xl font-bold text-amber-600">{inProgressCount}</div>
+          <div className="text-[11px] text-slate-500 mt-1">Active in this sprint</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs">
+          <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1">Sprint Completion</div>
+          <div className="text-2xl font-bold text-emerald-600">{completionPercentage}%</div>
+          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden border border-slate-200/50">
+            <div className="bg-emerald-600 h-full rounded-full transition-all duration-300" style={{ width: `${completionPercentage}%` }}></div>
           </div>
         </div>
 
-        {/* In Progress Velocity */}
-        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Active Velocity</span>
-            <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs">⚡</span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-amber-400">{inProgressCount}</div>
-          <div className="text-[11px] text-slate-400 mt-1 font-mono">
-            Tasks in active development
-          </div>
-        </div>
-
-        {/* Sprint Completion Rate */}
-        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Sprint Progress</span>
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs">📈</span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-emerald-400">{completionPercentage}%</div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-            <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${completionPercentage}%` }}></div>
-          </div>
-        </div>
-
-        {/* Services & Containers */}
-        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Docker Services</span>
-            <span className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 text-xs">🐳</span>
-          </div>
-          <div className="text-2xl lg:text-3xl font-black text-cyan-400">2 / 2 Up</div>
-          <div className="text-[11px] text-emerald-400 mt-1 font-mono flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Frontend & Backend Healthy
-          </div>
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs">
+          <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1">Completed Tasks</div>
+          <div className="text-2xl font-bold text-slate-900">{completedCount}</div>
+          <div className="text-[11px] text-emerald-600 mt-1 font-medium">Verified deliverables</div>
         </div>
       </div>
 
-      {/* Quick Task Composer Bar */}
-      <form onSubmit={handleQuickAdd} className="bg-slate-900/70 border border-slate-800/80 p-3 rounded-2xl shadow-lg flex items-center gap-2">
+      {/* Quick Task Composer */}
+      <form onSubmit={handleQuickAdd} className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs flex items-center gap-2">
         <input
           type="text"
           value={quickTitle}
           onChange={(e) => setQuickTitle(e.target.value)}
-          placeholder="⚡ Quick Add Task: Type task name and press Enter..."
-          className="flex-1 bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 outline-none"
+          placeholder="Quick add: Type task title and press Enter..."
+          className="flex-1 bg-transparent px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 outline-none"
         />
         <select
           value={quickPriority}
           onChange={(e) => setQuickPriority(e.target.value)}
-          className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none"
+          className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 outline-none"
         >
-          <option value="Urgent">🔥 Urgent</option>
-          <option value="High">⚡ High</option>
-          <option value="Medium">📌 Medium</option>
-          <option value="Low">☕ Low</option>
+          <option value="Urgent">Urgent</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
         </select>
         <button
           type="submit"
-          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition"
+          className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition"
         >
           Add
         </button>
       </form>
 
-      {/* Main Two-Column Viewport */}
+      {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left (2 Cols): High Priority Sprint Queue */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Left: Priority Sprint Queue */}
+        <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
-                Priority Sprint Queue
-              </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                {highPriorityTasks.length} Urgent / High
-              </span>
-            </div>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Priority Tasks ({highPriorityTasks.length})
+            </h2>
 
-            <Link to="/kanban" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            <Link to="/kanban" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
               View all tasks →
             </Link>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {highPriorityTasks.length === 0 ? (
-              <div className="p-8 bg-slate-900/40 rounded-2xl border border-slate-800 text-center">
-                <p className="text-xs text-slate-400 font-medium">All high priority tasks are completed! 🎉</p>
+              <div className="p-6 bg-white rounded-xl border border-slate-200 text-center">
+                <p className="text-xs text-slate-500 font-medium">All high priority tasks are completed.</p>
               </div>
             ) : (
               highPriorityTasks.slice(0, 5).map(task => (
                 <div
                   key={task.id}
-                  className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 p-4 rounded-xl shadow-md transition flex items-center justify-between gap-4"
+                  className="bg-white border border-slate-200 hover:border-slate-300 p-3.5 rounded-lg shadow-2xs transition flex items-center justify-between gap-4"
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${getPriorityBadge(task.priority)}`}>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${getPriorityBadge(task.priority)}`}>
                         {task.priority}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-medium">{task.category || 'Sprint'}</span>
-                      <span className="text-[10px] font-mono text-slate-500">· {task.status}</span>
+                      <span className="text-[10px] text-slate-400">{task.category || 'Sprint'}</span>
+                      <span className="text-[10px] font-mono text-slate-400">· {task.status}</span>
                     </div>
-                    <h3 className="text-xs font-bold text-slate-200 truncate">{task.title}</h3>
+                    <h3 className="text-xs font-semibold text-slate-800 truncate">{task.title}</h3>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {task.status === 'TO DO' && (
                       <button
                         onClick={() => updateTaskStatus(task.id, 'IN PROGRESS', user?.name || 'Krishna')}
-                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-[11px] font-semibold transition"
+                        className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium transition"
                       >
-                        ⚡ Start
+                        Start →
                       </button>
                     )}
                     {task.status === 'IN PROGRESS' && (
                       <button
                         onClick={() => updateTaskStatus(task.id, 'COMPLETED', user?.name || 'Krishna')}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold transition"
+                        className="px-2.5 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-medium transition"
                       >
                         ✓ Done
                       </button>
                     )}
                     <button
                       onClick={() => removeTask(task.id)}
-                      className="p-1 text-slate-600 hover:text-rose-400 transition text-xs"
+                      className="p-1 text-slate-400 hover:text-rose-600 transition text-xs"
                       title="Delete"
                     >
                       ✕
@@ -232,50 +204,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right (1 Col): Active Sprints & System Health */}
-        <div className="space-y-6">
-          {/* Active Sprint Projects Card */}
-          <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-xl space-y-4">
+        {/* Right: Sprints & Activity */}
+        <div className="space-y-4">
+          <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">Active Workspaces</h2>
-              <Link to="/projects" className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">Details →</Link>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Workspaces</h2>
+              <Link to="/projects" className="text-[11px] text-blue-600 hover:text-blue-700 font-medium">Details →</Link>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {safeProjects.map(proj => (
-                <div key={proj.id} className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+                <div key={proj.id} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-slate-200 truncate">{proj.title}</span>
-                    <span className="text-indigo-400 font-mono font-bold">{proj.progress}%</span>
+                    <span className="text-slate-800 truncate">{proj.title}</span>
+                    <span className="text-slate-500 font-mono font-semibold">{proj.progress}%</span>
                   </div>
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${proj.progress}%` }}></div>
+                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${proj.progress}%` }}></div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Quick Real-Time Team Activity Log */}
-          <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-xl space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">Recent Sprint Activity</h2>
-            <div className="space-y-3 text-xs">
-              <div className="flex items-start gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0"></span>
-                <p className="text-slate-400 leading-relaxed text-[11px]">
-                  <strong className="text-slate-200 font-semibold">Krishna</strong> completed task <span className="text-indigo-300">"Docker status & analytics resilience"</span>
+          <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-2xs space-y-3">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Recent Activity</h2>
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-600 text-[11px] leading-relaxed">
+                  <strong className="text-slate-800 font-medium">Krishna</strong> completed task <span className="text-slate-700">"Component boundary integrity"</span>
                 </p>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0"></span>
-                <p className="text-slate-400 leading-relaxed text-[11px]">
-                  <strong className="text-slate-200 font-semibold">System</strong> connected to <span className="text-cyan-300">Socket.IO real-time channel</span>
+              <div className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-600 text-[11px] leading-relaxed">
+                  <strong className="text-slate-800 font-medium">System</strong> connected to <span className="text-slate-700">WebSocket real-time channel</span>
                 </p>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></span>
-                <p className="text-slate-400 leading-relaxed text-[11px]">
-                  <strong className="text-slate-200 font-semibold">Sprint 24</strong> reached <span className="text-emerald-400 font-mono">85% velocity milestone</span>
+              <div className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-600 text-[11px] leading-relaxed">
+                  <strong className="text-slate-800 font-medium">Sprint 24</strong> reached <span className="text-slate-700 font-medium">85% velocity milestone</span>
                 </p>
               </div>
             </div>

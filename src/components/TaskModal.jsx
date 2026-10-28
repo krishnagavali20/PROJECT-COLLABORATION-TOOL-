@@ -13,7 +13,6 @@ export default function TaskModal() {
   const [category, setCategory] = useState('Frontend');
   const [assignee, setAssignee] = useState(user?.name || 'Krishna');
 
-  // Close modal on Escape key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isTaskModalOpen) {
@@ -39,7 +38,6 @@ export default function TaskModal() {
       addedBy: assignee.trim() || user?.name || 'Krishna'
     });
 
-    // Reset & close
     setTitle('');
     setDescription('');
     setPriority('High');
@@ -48,39 +46,34 @@ export default function TaskModal() {
   };
 
   const priorityOptions = [
-    { label: 'Urgent', value: 'Urgent', color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
-    { label: 'High', value: 'High', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-    { label: 'Medium', value: 'Medium', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' },
-    { label: 'Low', value: 'Low', color: 'bg-slate-700/40 text-slate-300 border-slate-600' }
+    { label: 'Urgent', value: 'Urgent', activeClass: 'bg-rose-100 text-rose-800 border-rose-300 font-semibold' },
+    { label: 'High', value: 'High', activeClass: 'bg-amber-100 text-amber-800 border-amber-300 font-semibold' },
+    { label: 'Medium', value: 'Medium', activeClass: 'bg-blue-100 text-blue-800 border-blue-300 font-semibold' },
+    { label: 'Low', value: 'Low', activeClass: 'bg-slate-200 text-slate-800 border-slate-300 font-semibold' }
   ];
 
-  const categoryOptions = ['Frontend', 'Backend', 'DevOps', 'Security', 'QA', 'Design'];
+  const categoryOptions = ['Frontend', 'Backend', 'DevOps', 'Security', 'QA', 'General'];
   const statusOptions = ['TO DO', 'IN PROGRESS', 'IN REVIEW', 'COMPLETED'];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Dim Backdrop Blur */}
+      {/* Light Backdrop */}
       <div 
         onClick={() => setIsTaskModalOpen(false)}
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs transition-opacity"
       />
 
-      {/* Modal Card */}
-      <div className="relative w-full max-w-lg bg-slate-900/95 border border-slate-800 rounded-2xl shadow-2xl shadow-indigo-950/50 p-6 z-10 animate-slide-up">
+      {/* Clean White Modal */}
+      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-xl shadow-xl p-6 z-10 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold">
-              +
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-white tracking-wide">Create New Task</h2>
-              <p className="text-[11px] text-slate-400">Add an issue to the current sprint backlog</p>
-            </div>
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 mb-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Create Task</h2>
+            <p className="text-xs text-slate-500">Add an issue to the current project sprint backlog</p>
           </div>
           <button
             onClick={() => setIsTaskModalOpen(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
           >
             ✕
           </button>
@@ -88,10 +81,9 @@ export default function TaskModal() {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Task Title <span className="text-rose-400">*</span>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Title <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
@@ -99,33 +91,31 @@ export default function TaskModal() {
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Implement WebSocket rate limiter & reconnect backoff"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-xs text-white placeholder-slate-500 outline-none transition"
+              placeholder="e.g. Implement WebSocket rate limiter"
+              className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 text-xs text-slate-900 placeholder-slate-400 outline-none transition"
             />
           </div>
 
-          {/* Description Textarea */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Description / Acceptance Criteria
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Description
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe deliverables, technical scope, or dependencies..."
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 text-xs text-white placeholder-slate-500 outline-none transition resize-none"
+              placeholder="Add acceptance criteria or notes..."
+              className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 text-xs text-slate-900 placeholder-slate-400 outline-none transition resize-none"
             />
           </div>
 
-          {/* Category & Status Row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 text-xs text-slate-200 outline-none"
+                className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 focus:border-slate-600 text-xs text-slate-800 outline-none"
               >
                 {categoryOptions.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -134,11 +124,11 @@ export default function TaskModal() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Initial Status</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Initial Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 text-xs text-slate-200 outline-none"
+                className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 focus:border-slate-600 text-xs text-slate-800 outline-none"
               >
                 {statusOptions.map(st => (
                   <option key={st} value={st}>{st}</option>
@@ -149,17 +139,17 @@ export default function TaskModal() {
 
           {/* Priority Pill Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Priority Level</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1.5">Priority</label>
             <div className="grid grid-cols-4 gap-2">
               {priorityOptions.map(opt => (
                 <button
                   type="button"
                   key={opt.value}
                   onClick={() => setPriority(opt.value)}
-                  className={`py-2 rounded-xl text-xs font-medium border text-center transition ${
+                  className={`py-1.5 rounded-lg text-xs border text-center transition ${
                     priority === opt.value
-                      ? `${opt.color} ring-2 ring-indigo-500/30 font-bold scale-[1.02]`
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                      ? `${opt.activeClass}`
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   {opt.label}
@@ -168,32 +158,31 @@ export default function TaskModal() {
             </div>
           </div>
 
-          {/* Assignee Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Assigned To</label>
+            <label className="block text-xs font-medium text-slate-700 mb-1">Assignee</label>
             <input
               type="text"
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
               placeholder="Assignee name"
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-indigo-500 text-xs text-white outline-none"
+              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 focus:border-slate-600 text-xs text-slate-900 outline-none"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
             <button
               type="button"
               onClick={() => setIsTaskModalOpen(false)}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
+              className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-slate-700 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-2xs transition active:scale-[0.99]"
             >
-              Add Task to Sprint
+              Create Task
             </button>
           </div>
         </form>
