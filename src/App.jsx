@@ -1,194 +1,138 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import React, { Component, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import KanbanBoard from './components/KanbanBoard';
+import Projects from './components/Projects';
 import Analytics from './components/Analytics';
-import Navbar from './components/navbar';
 import Chat from './components/Chat';
+import DockerStatus from './components/DockerStatus';
+import Sidebar from './components/Sidebar';
+import TopHeader from './components/TopHeader';
+import TaskModal from './components/TaskModal';
 import { UserContext } from './context/UserContext';
 import { TaskProvider } from './context/TaskContext';
 import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
-// Enhanced High-Tech Docker Status Console
-function DockerHome() {
-  const [message, setMessage] = useState("Connecting to backend...");
-  const [status, setStatus] = useState("loading");
-  const [latency, setLatency] = useState(null);
-  const [details, setDetails] = useState(null);
+// Resilient Error Boundary to guarantee zero white/blank screens
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
 
-  const checkHealth = () => {
-    setStatus("loading");
-    const start = performance.now();
-    fetch("http://localhost:5000/api")
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        const duration = Math.round(performance.now() - start);
-        setMessage(data.message || "Backend responded successfully");
-        setDetails(data);
-        setLatency(duration);
-        setStatus("online");
-      })
-      .catch((err) => {
-        setMessage(`Connection error: ${err.message}`);
-        setStatus("offline");
-        setLatency(null);
-      });
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  handleReset = () => {
+    try {
+      localStorage.removeItem("nexus_tasks_v2");
+    } catch {
+      // Ignore
+    }
+    this.setState({ hasError: false, error: null });
+    window.location.href = "/";
   };
 
-  useEffect(() => {
-    checkHealth();
-  }, []);
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+          <div className="p-8 rounded-2xl max-w-md w-full text-center border border-rose-500/30 bg-slate-900/95 shadow-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 mx-auto flex items-center justify-center text-2xl mb-4 border border-rose-500/20">
+              ⚠️
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">View Render Issue</h2>
+            <p className="text-xs text-slate-400 mb-4">
+              A temporary render error was safely caught by the Error Boundary.
+            </p>
+            <div className="p-3 bg-slate-950 rounded-xl text-left font-mono text-[11px] text-rose-300 break-all mb-6 border border-slate-800">
+              {this.state.error?.message || "Unknown error"}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => this.setState({ hasError: false })}
+                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition"
+              >
+                Retry View
+              </button>
+              <button
+                onClick={this.handleReset}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition shadow-lg shadow-indigo-600/30"
+              >
+                Reset & Return Home
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function MainLayout() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[82vh] px-4 py-12 animate-slide-up">
-      <div className="nexus-glass p-8 sm:p-10 rounded-3xl border border-slate-800 shadow-2xl max-w-xl w-full relative overflow-hidden">
-        {/* Glow accent */}
-        <div className="absolute top-0 right-0 w-64 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-10 -mt-10"></div>
-        
-        {/* Icon & Title */}
-        <div className="flex items-center gap-3.5 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 p-[1.5px] shadow-lg shadow-cyan-500/25">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-xl">
-              🐳
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                Docker Topology Status
-              </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Compose v2
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Experiment 9 Multi-Container Microservices Verification
-            </p>
-          </div>
-        </div>
-
-        {/* Services Status Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {/* Frontend Service */}
-          <div className="bg-slate-900/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frontend</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            </div>
-            <span className="text-sm font-bold text-white">Vite / React</span>
-            <span className="text-[11px] font-mono text-indigo-400">port 5173 (host)</span>
-          </div>
-
-          {/* Backend Service */}
-          <div className="bg-slate-900/80 border border-slate-800/90 rounded-xl p-3.5 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Backend</span>
-              <span className={`w-2 h-2 rounded-full ${status === 'online' ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`}></span>
-            </div>
-            <span className="text-sm font-bold text-white">Node / Express</span>
-            <span className="text-[11px] font-mono text-cyan-400">port 5000 (host)</span>
-          </div>
-        </div>
-
-        {/* Live Ping Response Box */}
-        <div className={`p-4 rounded-xl border text-xs font-mono transition-all duration-200 mb-6 ${
-          status === 'online'
-            ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-300'
-            : status === 'loading'
-            ? 'bg-slate-900/60 border-slate-700/80 text-slate-400'
-            : 'bg-rose-950/20 border-rose-500/30 text-rose-300'
-        }`}>
-          <div className="flex items-center justify-between mb-1.5 font-sans font-bold">
-            <span className="flex items-center gap-1.5 text-xs">
-              <span className={`w-2 h-2 rounded-full ${status === 'online' ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-              HTTP GET http://localhost:5000/api
-            </span>
-            {latency !== null && (
-              <span className="text-[10px] text-slate-400 font-mono">
-                {latency} ms latency
-              </span>
-            )}
-          </div>
-          <div className="break-all font-mono text-[11px] bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/80 text-slate-300">
-            {status === 'loading' ? 'Pinging endpoint...' : JSON.stringify(details || { message }, null, 2)}
-          </div>
-        </div>
-
-        {/* Re-check Button */}
-        <div className="flex items-center justify-between gap-3 mb-6">
-          <button
-            onClick={checkHealth}
-            className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold border border-slate-700/80 transition flex items-center justify-center gap-2"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-            <span>Re-Ping Container API</span>
-          </button>
-        </div>
-
-        {/* Bottom Quick Links */}
-        <div className="pt-4 border-t border-slate-800/80 flex items-center justify-center gap-4 text-xs font-semibold">
-          <Link to="/" className="text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1">
-            <span>💬 Live Chat</span>
-            <span>&rarr;</span>
-          </Link>
-          <span className="text-slate-700">•</span>
-          <Link to="/kanban" className="text-slate-400 hover:text-slate-200 transition">
-            Kanban Board
-          </Link>
-          <span className="text-slate-700">•</span>
-          <Link to="/analytics" className="text-slate-400 hover:text-slate-200 transition">
-            Analytics
-          </Link>
-        </div>
-
+    <div className="min-h-screen bg-slate-950 text-slate-100 relative transition-colors duration-300 selection:bg-indigo-500/30 selection:text-indigo-200">
+      {/* Radiant Ambient Background Mesh */}
+      <div className="ambient-glow">
+        <div className="ambient-orb-1"></div>
+        <div className="ambient-orb-2"></div>
+        <div className="ambient-orb-3"></div>
       </div>
+
+      {/* Persistent / Collapsible Left Sidebar */}
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
+
+      {/* Main Content Viewport with Desktop Sidebar Offset */}
+      <div className="lg:pl-64 flex flex-col min-h-screen relative z-10 transition-all duration-300">
+        {/* Universal Top Header */}
+        <TopHeader onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
+
+        {/* Dynamic Route Viewport */}
+        <main className="flex-1 pb-12">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/kanban" element={<KanbanBoard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/docker" element={<DockerStatus />} />
+            <Route path="*" element={<Dashboard />} />
+          </Routes>
+        </main>
+      </div>
+
+      {/* Universal Task Creation Modal */}
+      <TaskModal />
     </div>
   );
 }
 
 export default function App() {
-  const currentUser = { name: 'Krishna', role: 'Lead Developer' };
+  const currentUser = { name: 'Krishna Gavali', role: 'Lead Full-Stack Developer' };
 
   return (
-    <ThemeProvider>
-      <UserContext.Provider value={currentUser}>
-        <TaskProvider>
-          <BrowserRouter>
-            <div className="min-h-screen bg-slate-950 text-slate-100 relative transition-colors duration-300 selection:bg-indigo-500/30 selection:text-indigo-200">
-              
-              {/* Radiant Ambient Background Mesh */}
-              <div className="ambient-glow">
-                <div className="ambient-orb-1"></div>
-                <div className="ambient-orb-2"></div>
-                <div className="ambient-orb-3"></div>
-              </div>
-
-              {/* Navigation Bar */}
-              <div className="relative z-10">
-                <Navbar />
-                
-                {/* Main Routing Views */}
-                <Routes>
-                  {/* Home displays the Exp 8 WebSocket Real-Time Chat */}
-                  <Route path="/" element={<Chat />} />
-                  <Route path="/chat" element={<Chat />} />
-                  <Route path="/docker" element={<DockerHome />} />
-                  <Route path="/kanban" element={<Dashboard />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                </Routes>
-              </div>
-
-            </div>
-          </BrowserRouter>
-        </TaskProvider>
-      </UserContext.Provider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <UserContext.Provider value={currentUser}>
+          <TaskProvider>
+            <BrowserRouter>
+              <MainLayout />
+            </BrowserRouter>
+          </TaskProvider>
+        </UserContext.Provider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

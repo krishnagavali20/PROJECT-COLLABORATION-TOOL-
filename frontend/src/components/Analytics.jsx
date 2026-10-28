@@ -2,17 +2,25 @@ import { useContext } from 'react';
 import { TaskContext } from '../context/TaskContext';
 
 export default function Analytics() {
-  const { tasks } = useContext(TaskContext);
+  const context = useContext(TaskContext);
+  const tasks = Array.isArray(context?.tasks) ? context.tasks : [];
 
   const total = tasks.length;
-  const todoCount = tasks.filter(task => task.status === 'TO DO').length;
-  const inProgressCount = tasks.filter(task => task.status === 'IN PROGRESS').length;
-  const completedTasks = tasks.filter(task => task.status === 'COMPLETED');
+  const todoCount = tasks.filter(task => (task?.status || '').toUpperCase() === 'TO DO').length;
+  const inProgressCount = tasks.filter(task => (task?.status || '').toUpperCase() === 'IN PROGRESS').length;
+  const completedTasks = tasks.filter(task => (task?.status || '').toUpperCase() === 'COMPLETED');
   const completedCount = completedTasks.length;
 
   const completionPercentage = total > 0 ? Math.round((completedCount / total) * 100) : 0;
   const inProgressPercentage = total > 0 ? Math.round((inProgressCount / total) * 100) : 0;
   const todoPercentage = total > 0 ? Math.round((todoCount / total) * 100) : 0;
+
+  const getInitials = (name) => {
+    if (!name || typeof name !== 'string') return 'KR';
+    const trimmed = name.trim();
+    if (!trimmed) return 'KR';
+    return trimmed.slice(0, 2).toUpperCase();
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-slide-up">
@@ -175,13 +183,13 @@ export default function Analytics() {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {completedTasks.map(task => (
-                  <tr key={task.id} className="hover:bg-slate-900/40 transition duration-150">
+                  <tr key={task.id || Math.random()} className="hover:bg-slate-900/40 transition duration-150">
                     <td className="py-3.5 px-3 text-sm font-medium text-slate-300 flex items-center gap-2.5">
                       <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] font-bold">
                         ✓
                       </span>
                       <span className="line-through decoration-slate-600 text-slate-400">
-                        {task.title}
+                        {task.title || "Task"}
                       </span>
                     </td>
                     <td className="py-3.5 px-3">
@@ -192,7 +200,7 @@ export default function Analytics() {
                     <td className="py-3.5 px-3">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 text-white font-bold flex items-center justify-center text-[10px] shadow-sm">
-                          {task.completedBy?.slice(0, 2).toUpperCase() || 'KR'}
+                          {getInitials(task.completedBy)}
                         </div>
                         <span className="text-xs font-semibold text-slate-300">
                           {task.completedBy || 'Krishna'}

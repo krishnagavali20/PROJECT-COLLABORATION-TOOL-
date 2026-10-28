@@ -1,245 +1,287 @@
-import { useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { TaskContext } from '../context/TaskContext';
 import { UserContext } from '../context/UserContext';
 
 export default function Dashboard() {
-  const { tasks, addTask, removeTask, completeTask, updateTaskStatus, searchQuery } = useContext(TaskContext);
-  const user = useContext(UserContext); 
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [newTaskPriority, setNewTaskPriority] = useState("Medium");
+  const { tasks, addTask, updateTaskStatus, removeTask, projects, setIsTaskModalOpen } = useContext(TaskContext);
+  const user = useContext(UserContext);
 
-  const handleAdd = (e) => {
-    if (e) e.preventDefault();
-    if (newTaskTitle.trim() !== "") {
-      addTask(newTaskTitle, user?.name || "Krishna", newTaskPriority);
-      setNewTaskTitle(""); 
-    }
+  const [quickTitle, setQuickTitle] = useState('');
+  const [quickPriority, setQuickPriority] = useState('High');
+
+  const safeTasks = Array.isArray(tasks) ? tasks : [];
+  const safeProjects = Array.isArray(projects) ? projects : [];
+
+  const completedCount = safeTasks.filter(t => t.status === 'COMPLETED').length;
+  const inProgressCount = safeTasks.filter(t => t.status === 'IN PROGRESS').length;
+  const todoCount = safeTasks.filter(t => t.status === 'TO DO').length;
+  const totalCount = safeTasks.length || 1;
+  const completionPercentage = Math.round((completedCount / totalCount) * 100);
+
+  const handleQuickAdd = (e) => {
+    e.preventDefault();
+    if (!quickTitle.trim()) return;
+    addTask(quickTitle.trim(), user?.name || 'Krishna', quickPriority);
+    setQuickTitle('');
   };
 
-  const filteredTasks = tasks.filter(task => 
-    task.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const highPriorityTasks = safeTasks.filter(t => 
+    t.status !== 'COMPLETED' && (t.priority === 'High' || t.priority === 'Urgent')
   );
 
-  const todoTasks = filteredTasks.filter(t => t.status === 'TO DO');
-  const inProgressTasks = filteredTasks.filter(t => t.status === 'IN PROGRESS');
-  const completedTasks = filteredTasks.filter(t => t.status === 'COMPLETED');
-
   const getPriorityBadge = (priority) => {
-    switch (priority) {
-      case 'High':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-      case 'Medium':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    switch ((priority || '').toUpperCase()) {
+      case 'URGENT':
+        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+      case 'HIGH':
+        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+      case 'MEDIUM':
+        return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
       default:
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-slate-800 text-slate-400 border-slate-700';
     }
-  };
-
-  const renderTaskCard = (task) => {
-    const isDone = task.status === 'COMPLETED';
-
-    return (
-      <div 
-        key={task.id} 
-        className="group relative bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/80 p-4 rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
-      >
-        {/* Top Card Row: Priority & Actions */}
-        <div className="flex items-center justify-between gap-2 mb-2.5">
-          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${getPriorityBadge(task.priority)}`}>
-            {task.priority || "Normal"}
-          </span>
-
-          {/* Quick Action Buttons */}
-          <div className="flex items-center gap-1 opacity-75 group-hover:opacity-100 transition-opacity">
-            {task.status === 'TO DO' && (
-              <button 
-                onClick={() => updateTaskStatus(task.id, 'IN PROGRESS')} 
-                className="p-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs transition"
-                title="Move to In Progress"
-              >
-                ⚡ Start
-              </button>
-            )}
-
-            {task.status !== 'COMPLETED' ? (
-              <button 
-                onClick={() => completeTask(task.id, user?.name || "Krishna")} 
-                className="p-1 px-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-bold transition"
-                title="Mark as Complete"
-              >
-                ✓
-              </button>
-            ) : (
-              <button 
-                onClick={() => updateTaskStatus(task.id, 'TO DO')} 
-                className="p-1 px-1.5 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 text-xs transition"
-                title="Reopen Task"
-              >
-                ↺
-              </button>
-            )}
-
-            <button 
-              onClick={() => removeTask(task.id)} 
-              className="p-1 px-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition"
-              title="Delete Task"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
-        {/* Task Title */}
-        <p className={`text-sm font-semibold leading-relaxed mb-3 ${
-          isDone ? 'line-through text-slate-500 decoration-slate-600' : 'text-slate-100'
-        }`}>
-          {task.title}
-        </p>
-
-        {/* Card Footer: Metadata */}
-        <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 flex items-center justify-center font-bold text-[9px]">
-              {task.addedBy?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <span>{task.addedBy || 'System'}</span>
-          </div>
-          <span>{task.addedOn}</span>
-        </div>
-      </div>
-    );
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-slide-up">
-      {/* Header & Stats Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Sprint Kanban Board
+    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-slide-up space-y-8">
+      {/* Hero Welcome Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/60 via-slate-900/90 to-purple-950/40 border border-indigo-500/30 p-6 lg:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Sprint 24 · Production Phase
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
+              Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300">{user?.name || "Krishna"}</span> 👋
             </h1>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              {filteredTasks.length} Active Tasks
-            </span>
+            <p className="text-xs lg:text-sm text-slate-400 max-w-2xl leading-relaxed">
+              Workspace velocity is active at <strong className="text-indigo-300 font-semibold">{completionPercentage}% sprint completion</strong>. Multi-container microservices and WebSockets are live on Node.js port 5000.
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Real-time collaborative task pipeline with automated workflow states.
-          </p>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => setIsTaskModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 border border-indigo-400/30 transition-all duration-200 hover:scale-[1.02]"
+            >
+              + Create Task
+            </button>
+            <Link
+              to="/kanban"
+              className="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 font-semibold text-xs border border-slate-700 transition"
+            >
+              Open Kanban Board →
+            </Link>
+          </div>
         </div>
 
-        {/* New Task Inline Dock */}
-        <form onSubmit={handleAdd} className="flex flex-wrap items-center gap-2">
-          <input 
-            type="text" 
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="Add new task title..."
-            className="px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 w-64 shadow-inner"
-          />
-          <select
-            value={newTaskPriority}
-            onChange={(e) => setNewTaskPriority(e.target.value)}
-            className="px-3 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
-          >
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Normal">Normal</option>
-          </select>
-          <button 
-            type="submit"
-            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-          >
-            + Add Task
-          </button>
-        </form>
+        {/* Ambient decorative glow */}
+        <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* 3-Column Kanban Board Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* COLUMN 1: TO DO */}
-        <div className="nexus-glass rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col min-h-[480px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
-              <h2 className="text-xs font-bold tracking-wider uppercase text-slate-300">
-                To Do
-              </h2>
-            </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              {todoTasks.length}
-            </span>
+      {/* KPI Cards Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Tasks */}
+        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total Backlog</span>
+            <span className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs">📋</span>
           </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto">
-            {todoTasks.length === 0 ? (
-              <div className="h-48 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center p-4">
-                <span className="text-2xl mb-1">📋</span>
-                <p className="text-xs text-slate-400 font-medium">No tasks in backlog</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Create a task above to get started</p>
-              </div>
-            ) : (
-              todoTasks.map(renderTaskCard)
-            )}
+          <div className="text-2xl lg:text-3xl font-black text-white">{safeTasks.length}</div>
+          <div className="text-[11px] text-slate-400 mt-1 font-mono">
+            {todoCount} pending · {inProgressCount} active
           </div>
         </div>
 
-        {/* COLUMN 2: IN PROGRESS */}
-        <div className="nexus-glass rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col min-h-[480px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse"></span>
-              <h2 className="text-xs font-bold tracking-wider uppercase text-slate-300">
-                In Progress
-              </h2>
-            </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              {inProgressTasks.length}
-            </span>
+        {/* In Progress Velocity */}
+        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Active Velocity</span>
+            <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs">⚡</span>
           </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto">
-            {inProgressTasks.length === 0 ? (
-              <div className="h-48 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center p-4">
-                <span className="text-2xl mb-1">⚡</span>
-                <p className="text-xs text-slate-400 font-medium">No active tasks</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Click Start on a To Do card</p>
-              </div>
-            ) : (
-              inProgressTasks.map(renderTaskCard)
-            )}
+          <div className="text-2xl lg:text-3xl font-black text-amber-400">{inProgressCount}</div>
+          <div className="text-[11px] text-slate-400 mt-1 font-mono">
+            Tasks in active development
           </div>
         </div>
 
-        {/* COLUMN 3: COMPLETED */}
-        <div className="nexus-glass rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col min-h-[480px]">
-          <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
-              <h2 className="text-xs font-bold tracking-wider uppercase text-slate-300">
-                Completed
-              </h2>
-            </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              {completedTasks.length}
-            </span>
+        {/* Sprint Completion Rate */}
+        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Sprint Progress</span>
+            <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs">📈</span>
           </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto">
-            {completedTasks.length === 0 ? (
-              <div className="h-48 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center p-4">
-                <span className="text-2xl mb-1">🎯</span>
-                <p className="text-xs text-slate-400 font-medium">No completed tasks yet</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Finish in-progress tasks to verify</p>
-              </div>
-            ) : (
-              completedTasks.map(renderTaskCard)
-            )}
+          <div className="text-2xl lg:text-3xl font-black text-emerald-400">{completionPercentage}%</div>
+          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+            <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${completionPercentage}%` }}></div>
           </div>
         </div>
 
+        {/* Services & Containers */}
+        <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-lg hover:border-slate-700 transition">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Docker Services</span>
+            <span className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 text-xs">🐳</span>
+          </div>
+          <div className="text-2xl lg:text-3xl font-black text-cyan-400">2 / 2 Up</div>
+          <div className="text-[11px] text-emerald-400 mt-1 font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Frontend & Backend Healthy
+          </div>
+        </div>
       </div>
-    </main>
+
+      {/* Quick Task Composer Bar */}
+      <form onSubmit={handleQuickAdd} className="bg-slate-900/70 border border-slate-800/80 p-3 rounded-2xl shadow-lg flex items-center gap-2">
+        <input
+          type="text"
+          value={quickTitle}
+          onChange={(e) => setQuickTitle(e.target.value)}
+          placeholder="⚡ Quick Add Task: Type task name and press Enter..."
+          className="flex-1 bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 outline-none"
+        />
+        <select
+          value={quickPriority}
+          onChange={(e) => setQuickPriority(e.target.value)}
+          className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 outline-none"
+        >
+          <option value="Urgent">🔥 Urgent</option>
+          <option value="High">⚡ High</option>
+          <option value="Medium">📌 Medium</option>
+          <option value="Low">☕ Low</option>
+        </select>
+        <button
+          type="submit"
+          className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition"
+        >
+          Add
+        </button>
+      </form>
+
+      {/* Main Two-Column Viewport */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left (2 Cols): High Priority Sprint Queue */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+                Priority Sprint Queue
+              </h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                {highPriorityTasks.length} Urgent / High
+              </span>
+            </div>
+
+            <Link to="/kanban" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+              View all tasks →
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {highPriorityTasks.length === 0 ? (
+              <div className="p-8 bg-slate-900/40 rounded-2xl border border-slate-800 text-center">
+                <p className="text-xs text-slate-400 font-medium">All high priority tasks are completed! 🎉</p>
+              </div>
+            ) : (
+              highPriorityTasks.slice(0, 5).map(task => (
+                <div
+                  key={task.id}
+                  className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 p-4 rounded-xl shadow-md transition flex items-center justify-between gap-4"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${getPriorityBadge(task.priority)}`}>
+                        {task.priority}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-medium">{task.category || 'Sprint'}</span>
+                      <span className="text-[10px] font-mono text-slate-500">· {task.status}</span>
+                    </div>
+                    <h3 className="text-xs font-bold text-slate-200 truncate">{task.title}</h3>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {task.status === 'TO DO' && (
+                      <button
+                        onClick={() => updateTaskStatus(task.id, 'IN PROGRESS', user?.name || 'Krishna')}
+                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-[11px] font-semibold transition"
+                      >
+                        ⚡ Start
+                      </button>
+                    )}
+                    {task.status === 'IN PROGRESS' && (
+                      <button
+                        onClick={() => updateTaskStatus(task.id, 'COMPLETED', user?.name || 'Krishna')}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold transition"
+                      >
+                        ✓ Done
+                      </button>
+                    )}
+                    <button
+                      onClick={() => removeTask(task.id)}
+                      className="p-1 text-slate-600 hover:text-rose-400 transition text-xs"
+                      title="Delete"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Right (1 Col): Active Sprints & System Health */}
+        <div className="space-y-6">
+          {/* Active Sprint Projects Card */}
+          <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">Active Workspaces</h2>
+              <Link to="/projects" className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium">Details →</Link>
+            </div>
+
+            <div className="space-y-3">
+              {safeProjects.map(proj => (
+                <div key={proj.id} className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-medium">
+                    <span className="text-slate-200 truncate">{proj.title}</span>
+                    <span className="text-indigo-400 font-mono font-bold">{proj.progress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-indigo-500 h-full rounded-full transition-all duration-500" style={{ width: `${proj.progress}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Real-Time Team Activity Log */}
+          <div className="bg-slate-900/70 border border-slate-800/80 p-5 rounded-2xl shadow-xl space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">Recent Sprint Activity</h2>
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-400 leading-relaxed text-[11px]">
+                  <strong className="text-slate-200 font-semibold">Krishna</strong> completed task <span className="text-indigo-300">"Docker status & analytics resilience"</span>
+                </p>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-indigo-400 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-400 leading-relaxed text-[11px]">
+                  <strong className="text-slate-200 font-semibold">System</strong> connected to <span className="text-cyan-300">Socket.IO real-time channel</span>
+                </p>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></span>
+                <p className="text-slate-400 leading-relaxed text-[11px]">
+                  <strong className="text-slate-200 font-semibold">Sprint 24</strong> reached <span className="text-emerald-400 font-mono">85% velocity milestone</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
