@@ -32,7 +32,8 @@ export default function Chat() {
   }, [username]);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000", {
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const socket = io(backendUrl, {
       reconnectionAttempts: 5,
       timeout: 10000,
     });
