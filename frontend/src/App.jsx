@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useContext } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import KanbanBoard from './components/KanbanBoard';
@@ -8,7 +8,8 @@ import Chat from './components/Chat';
 import Sidebar from './components/Sidebar';
 import TopHeader from './components/TopHeader';
 import TaskModal from './components/TaskModal';
-import { UserContext } from './context/UserContext';
+import Auth from './components/Auth';
+import { UserProvider, UserContext } from './context/UserContext';
 import { TaskProvider } from './context/TaskContext';
 import './App.css';
 
@@ -109,18 +110,26 @@ function MainLayout() {
   );
 }
 
-export default function App() {
-  const currentUser = { name: 'Krishna Gavali', role: 'Full-Stack Developer' };
+function AppContent() {
+  const { isAuthenticated } = useContext(UserContext);
 
+  if (!isAuthenticated) {
+    return <Auth />;
+  }
+
+  return <MainLayout />;
+}
+
+export default function App() {
   return (
     <ErrorBoundary>
-      <UserContext.Provider value={currentUser}>
+      <UserProvider>
         <TaskProvider>
           <BrowserRouter>
-            <MainLayout />
+            <AppContent />
           </BrowserRouter>
         </TaskProvider>
-      </UserContext.Provider>
+      </UserProvider>
     </ErrorBoundary>
   );
 }

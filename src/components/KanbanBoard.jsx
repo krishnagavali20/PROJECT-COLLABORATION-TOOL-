@@ -4,7 +4,7 @@ import { UserContext } from '../context/UserContext';
 
 export default function KanbanBoard() {
   const { tasks, removeTask, updateTaskStatus, searchQuery, activeFilter, setIsTaskModalOpen } = useContext(TaskContext);
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const [filterPriority, setFilterPriority] = useState('ALL');
 

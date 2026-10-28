@@ -8,13 +8,21 @@ const router = express.Router();
 // 1. REGISTER
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, profession, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Name, email, and password are required."
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({
-        message: "User already exists"
+        message: "User already exists with this email. Please sign in instead."
       });
     }
 
@@ -23,17 +31,32 @@ router.post("/register", async (req, res) => {
 
     // Create user in MongoDB
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      profession: (profession && profession.trim()) || "Full-Stack Developer",
+      email: cleanEmail,
       password: hashedPassword,
       role: role || "user"
     });
 
+    // Generate JWT token immediately so user is signed in
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET || "default_secret_key",
+      {
+        expiresIn: "7d"
+      }
+    );
+
     res.status(201).json({
       message: "User registered successfully",
+      token,
       user: {
         id: user._id,
         name: user.name,
+        profession: user.profession || "Full-Stack Developer",
         email: user.email,
         role: user.role
       }
@@ -51,8 +74,16 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required."
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
     // Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(401).json({
         message: "Invalid email or password"
@@ -73,9 +104,9 @@ router.post("/login", async (req, res) => {
         id: user._id,
         role: user.role
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "default_secret_key",
       {
-        expiresIn: "1h"
+        expiresIn: "7d"
       }
     );
 
@@ -85,6 +116,7 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        profession: user.profession || "Full-Stack Developer",
         email: user.email,
         role: user.role
       }

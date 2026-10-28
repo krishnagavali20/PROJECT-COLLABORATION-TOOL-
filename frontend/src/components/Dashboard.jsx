@@ -5,7 +5,7 @@ import { UserContext } from '../context/UserContext';
 
 export default function Dashboard() {
   const { tasks, addTask, updateTaskStatus, removeTask, projects, setIsTaskModalOpen } = useContext(TaskContext);
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const [quickTitle, setQuickTitle] = useState('');
   const [quickPriority, setQuickPriority] = useState('High');
@@ -53,8 +53,13 @@ export default function Dashboard() {
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               KoBo · Sprint 24 Workspace
             </div>
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight">
-              Welcome back, {user?.name || "Krishna"}
+            <h1 className="text-xl lg:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
+              <span>Welcome back, {user?.name || "Krishna"}</span>
+              {user?.profession && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-sans">
+                  {user.profession}
+                </span>
+              )}
             </h1>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
               Sprint 24 velocity is at <strong className="text-slate-800 font-semibold">{completionPercentage}% completion</strong>. You have {inProgressCount} active tasks currently in development.

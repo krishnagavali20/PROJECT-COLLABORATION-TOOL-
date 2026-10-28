@@ -1,15 +1,16 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { io } from "socket.io-client";
+import { UserContext } from "../context/UserContext";
 
 export default function Chat() {
-  const [username, setUsername] = useState(() => {
-    try {
-      return localStorage.getItem("nexus_chat_username") || "Krishna";
-    } catch {
-      return "Krishna";
-    }
-  });
+  const { user } = useContext(UserContext);
+  const [username, setUsername] = useState(user?.name || "Krishna");
 
+  useEffect(() => {
+    if (user?.name) {
+      setUsername(user.name);
+    }
+  }, [user?.name]);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -22,14 +23,6 @@ export default function Chat() {
   const [socketId, setSocketId] = useState(null);
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("nexus_chat_username", username);
-    } catch {
-      // Ignore
-    }
-  }, [username]);
 
   useEffect(() => {
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -72,6 +65,7 @@ export default function Chat() {
 
     const socketMessage = {
       username: username.trim(),
+      profession: user?.profession || "Developer",
       message: message.trim()
     };
 
@@ -85,6 +79,7 @@ export default function Chat() {
     if (!username.trim()) return;
     const socketMessage = {
       username: username.trim(),
+      profession: user?.profession || "Developer",
       message: promptText
     };
     if (socketRef.current) {
@@ -181,6 +176,11 @@ export default function Chat() {
                     <span className="font-semibold text-slate-700">
                       {isSelf ? "You" : item.username}
                     </span>
+                    {item.profession && (
+                      <span className="text-[10px] text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded font-sans">
+                        {item.profession}
+                      </span>
+                    )}
                     <span className="text-[10px] text-slate-400">
                       {item.timestamp || "Just now"}
                     </span>

@@ -6,8 +6,15 @@ import { UserContext } from '../context/UserContext';
 
 export default function Sidebar({ isOpen, onClose }) {
   const { tasks, projects, setIsTaskModalOpen } = useContext(TaskContext);
-  const user = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
   const location = useLocation();
+
+  const getInitials = (name) => {
+    if (!name || typeof name !== 'string') return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
 
   const safeTasks = Array.isArray(tasks) ? tasks : [];
   const todoCount = safeTasks.filter(t => t.status === 'TO DO').length;
@@ -188,19 +195,28 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="p-3 border-t border-slate-200 bg-slate-50/50">
           <div className="p-2 rounded-lg bg-white border border-slate-200 flex items-center justify-between shadow-2xs">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center font-semibold text-xs">
-                KG
+              <div className="w-7 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center font-semibold text-xs flex-shrink-0">
+                {getInitials(user?.name)}
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-slate-800 truncate">
-                  {user?.name || "Krishna Gavali"}
+                  {user?.name || "Guest User"}
                 </div>
                 <div className="text-[10px] text-slate-500 truncate">
-                  {user?.role || "Developer"}
+                  {user?.profession || user?.role || "Developer"}
                 </div>
               </div>
             </div>
-            <div className="w-2 h-2 rounded-full bg-emerald-500" title="Online"></div>
+            
+            <button
+              onClick={logout}
+              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              title="Sign Out"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>

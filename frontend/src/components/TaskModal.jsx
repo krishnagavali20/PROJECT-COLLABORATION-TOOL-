@@ -4,7 +4,7 @@ import { UserContext } from '../context/UserContext';
 
 export default function TaskModal() {
   const { isTaskModalOpen, setIsTaskModalOpen, addTask } = useContext(TaskContext);
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -12,6 +12,12 @@ export default function TaskModal() {
   const [status, setStatus] = useState('TO DO');
   const [category, setCategory] = useState('Frontend');
   const [assignee, setAssignee] = useState(user?.name || 'Krishna');
+
+  useEffect(() => {
+    if (user?.name) {
+      setAssignee(user.name);
+    }
+  }, [user?.name, isTaskModalOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
